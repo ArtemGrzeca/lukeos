@@ -1,0 +1,92 @@
+; --------------------------------------------
+; xClock
+; 0x10c
+; Made by lukezaa
+; --------------------------------------------
+
+; --FUNCTION-----------------------------------
+; xClock_Tick_Rate
+; --ARGS--------------------------------------
+; B - Tick (60/b)
+; --RETURN------------------------------------
+; NONE
+; --------------------------------------------
+:xClock_Tick_Rate
+	IFE [xSys_Inited_xClock],1
+		SET PC,POP
+	SET A,0
+	HWI [xClock_Clock_Addres]
+	SET PC,POP
+	
+; --FUNCTION-----------------------------------
+; xClock_Ticks
+; --ARGS--------------------------------------
+; NONE
+; --RETURN------------------------------------
+; C - Ticks from last call
+; --------------------------------------------
+:xClock_Ticks
+	IFE [xSys_Inited_xClock],1
+		SET PC,POP
+	SET A,1
+	HWI [xClock_Clock_Addres]
+	SET PC,POP
+	
+; --FUNCTION-----------------------------------
+; xClock_Switch_INT
+; --ARGS--------------------------------------
+; B - State
+; --RETURN------------------------------------
+; NONE
+; --------------------------------------------
+:xClock_Switch_INT
+	IFE [xSys_Inited_xClock],1
+		SET PC,POP
+	SET A,2
+	HWI [xClock_Clock_Addres]
+	SET PC,POP
+	
+; --FUNCTION-----------------------------------
+; xClock_INT
+; --ARGS--------------------------------------
+; NONE
+; --RETURN------------------------------------
+; NONE
+; --------------------------------------------
+:xClock_INT
+	IFE [xSys_Inited_xClock],1
+		SET PC,POP
+		
+	ADD [xClock_TMP0],1
+	IFL [xClock_TMP0],4
+		SET PC,POP
+	IFL [xClock_Time+3],0xFFFF
+		ADD [xClock_Time+3],1
+		
+	IFE [xClock_Time+3],0xFFFF
+		SET [xClock_Time+3],0x0000
+	IFE [xClock_Time+3],0xFFFF
+		ADD [xClock_Time+2],1
+	SET [xClock_TMP0],0
+	SET PC,POP
+	
+; --------------------------------------------
+; MEMORY SYMBOLS
+; --------------------------------------------
+
+:xClock_Time DAT 0x0000,0x0000,0x0000,0x0000
+
+; --------------------------------------------
+; TEMP
+; --------------------------------------------
+
+:xClock_TMP0 DAT 0x0000
+:xClock_TMP1 DAT 0x0000
+:xClock_TMP2 DAT 0x0000
+:xClock_TMP3 DAT 0x0000
+:xClock_TMP4 DAT 0x0000
+:xClock_TMP5 DAT 0x0000
+:xClock_TMP6 DAT 0x0000
+:xClock_TMP7 DAT 0x0000
+:xClock_TMP8 DAT 0x0000
+:xClock_TMP9 DAT 0x0000

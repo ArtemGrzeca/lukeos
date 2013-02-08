@@ -1,0 +1,149 @@
+; --------------------------------------------
+; xSys
+; 0x10c drivers lib
+; Made by lukezaa
+; --------------------------------------------
+
+; --INCLUDE------------------------------------
+;.include "xPrint.dasm16"
+;.include "xKeyboard.dasm16"
+;.include "xDisk.dasm16"
+;.include "x3D.dasm16"
+;.include "xClock.dasm16"
+
+; --FUNCTION-----------------------------------
+; xInit
+; --ARGS--------------------------------------
+; NONE
+; --RETURN------------------------------------
+; NONE
+; --------------------------------------------
+
+:xInit
+	HWN I
+	IFE I,0
+		SET PC,POP
+	ADD I,1
+:xInit_Loop1_Start
+	SUB I,1
+	HWQ I
+	IFE B,0x7349
+		IFE A,0xF615
+			SET PC,xInit_xPrint_Return
+	IFE B,0x30CF
+		IFE A,0x7406
+			SET PC,xInit_xKeyboard_Return
+	IFE B,0x4FD5
+		IFE A,0x24C5
+			SET PC,xInit_xDisk_Return
+	IFE B,0x42BA
+		IFE A,0xBF3C
+			SET PC,xInit_x3D_Return
+	IFE B,0x12D0
+		IFE A,0xB402
+			SET PC,xInit_xClock_Return
+	IFN I,0xFFFF
+		SET PC,xInit_Loop1_Start
+	SET PC,POP
+:xInit_xPrint_Return
+	SET [xPrint_Display_Addres],I
+	
+	SET A,0
+	SET B,[xPrint_Video_Memory_Start]
+	HWI [xPrint_Display_Addres]
+	SET [xSys_Inited_xPrint],0
+	SET PC,xInit_Loop1_Start
+:xInit_xKeyboard_Return
+	SET [xKeyboard_Keyboard_Addres],I
+	
+	SET A,0
+	HWI [xKeyboard_Keyboard_Addres]
+	SET [xSys_Inited_xKeyboard],0
+	SET PC,xInit_Loop1_Start
+
+:xInit_xDisk_Return
+	SET [xDisk_Drive_Addres],I
+	SET [xSys_Inited_xDisk],0
+	SET PC,xInit_Loop1_Start
+	
+:xInit_x3D_Return
+	SET [x3D_Display_Addres],I
+	SET [xSys_Inited_x3D],0
+	SET PC,xInit_Loop1_Start
+	
+:xInit_xClock_Return
+	SET [xClock_Clock_Addres],I
+	SET [xSys_Inited_xClock],0
+	SET PC,xInit_Loop1_Start
+	
+:xInit_Return
+	SET PC,POP
+	
+; --FUNCTION-----------------------------------
+; xArg
+; --ARGS--------------------------------------
+; A - String Pointer
+; --RETURN------------------------------------
+; NONE
+; --------------------------------------------
+:xArg
+	IFE [A],0x0020
+		SET [A],0x0003
+	ADD A,1
+	IFE [A],0x0003
+		SET PC,xArg_End
+	SET PC,xArg
+:xArg_End
+	ADD A,1
+	SET [A],0x0005
+	SET PC,POP
+
+; --FUNCTION-----------------------------------
+; xArg_Get
+; --ARGS--------------------------------------
+; A - String Pointer
+; B - Arg.
+; --RETURN------------------------------------
+; A - Arg. String Pointer
+; --------------------------------------------
+:xArg_Get
+	SET J,0
+	SET X,A
+:xArg_Get_Loop
+	IFE J,B
+		SET PC,xArg_Get_End
+	SET A,X
+	JSR stdlib_strlen
+	ADD X,I
+	ADD X,1
+	IFE [X],0x0005
+		SET PC,xArg_Get_End_Error
+	ADD J,1
+	SET PC,xArg_Get_Loop
+:xArg_Get_End
+	SET A,X
+	SET PC,POP
+:xArg_Get_End_Error
+	SET A,xArg_Get_Str1
+	SET PC,POP
+:xArg_Get_Str1 DAT "null",0x0003
+
+; --------------------------------------------
+; INIT STATUS
+; --------------------------------------------
+
+:xSys_Inited_xPrint DAT 0x0001
+:xSys_Inited_xKeyboard DAT 0x0001
+:xSys_Inited_xDisk DAT 0x0001
+:xSys_Inited_x3D DAT 0x0001
+:xSys_Inited_xClock DAT 0x0001
+
+; --------------------------------------------
+; ADRESS
+; --------------------------------------------
+
+:xDisk_Drive_Addres DAT 0xFFFF
+:xKeyboard_Keyboard_Addres DAT 0xFFFF
+:xPrint_Display_Addres DAT 0xFFFF
+:x3D_Display_Addres DAT 0xFFFF
+:xClock_Clock_Addres DAT 0xFFFF

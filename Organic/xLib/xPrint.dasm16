@@ -1,0 +1,428 @@
+; --------------------------------------------
+; xPrint
+; 0x10c LEM1802 Display Driver
+; Made by lukezaa
+; --------------------------------------------
+
+; --FUNCTION-----------------------------------
+; xPrint_Print_String
+; --ARGS--------------------------------------
+; A - String (Memory Pos)
+; --RETURN------------------------------------
+; NONE
+; --------------------------------------------
+:xPrint_Print_String
+	IFE [xSys_Inited_xPrint],1
+		SET PC,POP
+	SET B,[xPrint_Video_Memory_Color_F]
+	SET C,[xPrint_Video_Memory_Color_B]
+	SET Z,0
+	SHL B,12
+	SHL C,8
+	ADD B,C
+	SET [xPrint_TMP1],B
+:xPrint_Print_String_Loop1_Start
+	IFG [xPrint_Video_Memory_Offset],383
+		JSR xPrint_Scroll
+	IFE [A],0x0003
+		SET PC,xPrint_Print_String_Loop1_End
+	IFE [A],0x2F ;char /
+		SET PC,xPrint_Print_String_Event1
+	IFE [A],0x5E ;char "^" f
+		SET PC,xPrint_Print_String_Event2
+	IFE [A],0x25 ;char "%" bg
+		SET PC,xPrint_Print_String_Event3
+	SET X,[A]
+	BOR X,[xPrint_TMP1]
+	SET [xPrint_TMP0],[xPrint_Video_Memory_Start]
+	ADD [xPrint_TMP0],[xPrint_Video_Memory_Offset]
+	SET J,[xPrint_TMP0]
+	SET [J],X
+	ADD [xPrint_Video_Memory_Offset],1
+	ADD A,1
+	SET PC,xPrint_Print_String_Loop1_Start
+:xPrint_Print_String_Loop1_End
+	;SUB [xPrint_Video_Memory_Offset],1
+	SET PC,POP
+:xPrint_Print_String_Event1
+	ADD A,1
+	
+	IFE [A],0x30
+		SET PC,xPrint_Print_String_Loop1_End
+	IFE [A],0x6E
+		JSR xPrint_New_Line
+	
+	ADD A,1
+	SET PC,xPrint_Print_String_Loop1_Start
+:xPrint_Print_String_Event2
+	ADD A,1
+	
+	IFE [A],0x30
+		SET B,0x0
+	IFE [A],0x31
+		SET B,0x1
+	IFE [A],0x32
+		SET B,0x2
+	IFE [A],0x33
+		SET B,0x3
+	IFE [A],0x34
+		SET B,0x4
+	IFE [A],0x35
+		SET B,0x5
+	IFE [A],0x36
+		SET B,0x6
+	IFE [A],0x37
+		SET B,0x7
+	IFE [A],0x38
+		SET B,0x8
+	IFE [A],0x39
+		SET B,0x9
+		
+	IFE [A],0x61
+		SET B,0xA
+	IFE [A],0x62
+		SET B,0xB
+	IFE [A],0x63
+		SET B,0xC
+	IFE [A],0x64
+		SET B,0xD
+	IFE [A],0x65
+		SET B,0xE
+	IFE [A],0x66
+		SET B,0xF
+	
+	SET [xPrint_Video_Memory_Color_F],B
+	
+	SET B,[xPrint_Video_Memory_Color_F]
+	SET C,[xPrint_Video_Memory_Color_B]
+	SHL B,12
+	SHL C,8
+	ADD B,C
+	SET [xPrint_TMP1],B
+	ADD A,1
+	SET PC,xPrint_Print_String_Loop1_Start
+:xPrint_Print_String_Event3
+	ADD A,1
+	
+	IFE [A],0x30
+		SET B,0x0
+	IFE [A],0x31
+		SET B,0x1
+	IFE [A],0x32
+		SET B,0x2
+	IFE [A],0x33
+		SET B,0x3
+	IFE [A],0x34
+		SET B,0x4
+	IFE [A],0x35
+		SET B,0x5
+	IFE [A],0x36
+		SET B,0x6
+	IFE [A],0x37
+		SET B,0x7
+	IFE [A],0x38
+		SET B,0x8
+	IFE [A],0x39
+		SET B,0x9
+		
+	IFE [A],0x61
+		SET B,0xA
+	IFE [A],0x62
+		SET B,0xB
+	IFE [A],0x63
+		SET B,0xC
+	IFE [A],0x64
+		SET B,0xD
+	IFE [A],0x65
+		SET B,0xE
+	IFE [A],0x66
+		SET B,0xF
+	
+	SET [xPrint_Video_Memory_Color_B],B
+	
+	SET B,[xPrint_Video_Memory_Color_F]
+	SET C,[xPrint_Video_Memory_Color_B]
+	SHL B,12
+	SHL C,8
+	ADD B,C
+	SET [xPrint_TMP1],B
+	ADD A,1
+	SET PC,xPrint_Print_String_Loop1_Start
+	
+; --FUNCTION-----------------------------------
+; xPrint_Print_Char
+; --ARGS--------------------------------------
+; A - Char
+; B - Font Color
+; C - Char BG Font
+; --RETURN------------------------------------
+; NONE
+; --------------------------------------------
+:xPrint_Print_Char
+	IFE [xSys_Inited_xPrint],1
+		SET PC,POP
+	IFG [xPrint_Video_Memory_Offset],383
+		JSR xPrint_Scroll
+	SET Z,[xPrint_Video_Memory_Start]
+	ADD Z,[xPrint_Video_Memory_Offset]
+	ADD Z,1
+	SHL B,12
+	SHL C,8
+	ADD B,C
+	BOR A,B
+	SET [Z],A
+	ADD [xPrint_Video_Memory_Offset],1
+	SET PC,POP
+	
+; --FUNCTION-----------------------------------
+; xPrint_Print_Cursor
+; --ARGS--------------------------------------
+; B - Font Color
+; C - Char BG Font
+; --RETURN------------------------------------
+; NONE
+; --------------------------------------------
+:xPrint_Print_Cursor
+	IFE [xSys_Inited_xPrint],1
+		SET PC,POP
+	IFG [xPrint_Video_Memory_Offset],383
+		JSR xPrint_Scroll
+	SET A,0x5F
+	BOR A,0x0080
+	SET Z,[xPrint_Video_Memory_Start]
+	ADD Z,[xPrint_Video_Memory_Offset]
+	ADD Z,1
+	SHL B,12
+	SHL C,8
+	ADD B,C
+	BOR A,B
+	SET [Z],A
+	SET PC,POP
+	
+; --FUNCTION-----------------------------------
+; xPrint_Del_Char
+; --ARGS--------------------------------------
+; A - Char (offset)
+; B - Font Color
+; C - Char BG Font
+; --RETURN------------------------------------
+; NONE
+; --------------------------------------------
+:xPrint_Del_Char
+	IFE [xSys_Inited_xPrint],1
+		SET PC,POP
+	IFL A,0
+		SET PC,POP
+	SET Z,[xPrint_Video_Memory_Start]
+	ADD Z,A
+	SET A,0x0020
+	SHL B,12
+	SHL C,8
+	ADD B,C
+	BOR A,B
+	SET [Z],A
+	SET PC,POP
+	
+; --FUNCTION-----------------------------------
+; xPrint_Cls
+; --ARGS--------------------------------------
+; NONE
+; --RETURN------------------------------------
+; NONE
+; --------------------------------------------
+:xPrint_Cls
+	IFE [xSys_Inited_xPrint],1
+		SET PC,POP
+		
+	SET C,[xPrint_Video_Memory_Color_B]
+	SET B,[xPrint_Video_Memory_Color_F]
+	SET A,0x0020
+	SHL B,12
+	SHL C,8
+	ADD B,C
+	BOR A,B
+	SET [xPrint_Video_Memory_Offset],1
+	SET Z,[xPrint_Video_Memory_Start]
+	ADD Z,[xPrint_Video_Memory_Offset]
+	SET I,[xPrint_Video_Memory_Start]
+	ADD I,384
+:xPrint_Cls_Loop1_Start
+	SET [Z],A
+	ADD Z,1
+	IFE Z,I
+		SET PC,xPrint_Cls_Loop1_End
+	SET PC,xPrint_Cls_Loop1_Start
+:xPrint_Cls_Loop1_End
+	SUB [xPrint_Video_Memory_Offset],1
+	SET PC,POP
+	
+; --FUNCTION-----------------------------------
+; xPrint_New_Line
+; --ARGS--------------------------------------
+; NONE
+; --RETURN------------------------------------
+; NONE
+; --------------------------------------------
+:xPrint_New_Line
+	IFE [xSys_Inited_xPrint],1
+		SET PC,POP
+	IFG [xPrint_Video_Memory_Offset],383
+		JSR xPrint_Scroll
+	AND [xPrint_Video_Memory_Offset],0xFFE0
+	ADD [xPrint_Video_Memory_Offset],32
+	IFG [xPrint_Video_Memory_Offset],383
+		SET PC,xPrint_Scroll
+	SET PC,POP
+	
+; --FUNCTION-----------------------------------
+; xPrint_Dump_Font
+; --ARGS--------------------------------------
+; A - Addres
+; --RETURN------------------------------------
+; NONE
+; --------------------------------------------
+:xPrint_Dump_Font
+	IFE [xSys_Inited_xPrint],1
+		SET PC,POP
+	SET B,A
+	SET A,4
+	HWI [xPrint_Display_Addres]
+	SET PC,POP
+	
+; --FUNCTION-----------------------------------
+; xPrint_Dump_Palette
+; --ARGS--------------------------------------
+; A - Addres
+; --RETURN------------------------------------
+; NONE
+; --------------------------------------------
+:xPrint_Dump_Palette
+	IFE [xSys_Inited_xPrint],1
+		SET PC,POP
+	SET B,A
+	SET A,5
+	HWI [xPrint_Display_Addres]
+	SET PC,POP
+	
+; --FUNCTION-----------------------------------
+; xPrint_Font
+; --ARGS--------------------------------------
+; A - Addres
+; --RETURN------------------------------------
+; NONE
+; --------------------------------------------
+:xPrint_Font
+	IFE [xSys_Inited_xPrint],1
+		SET PC,POP
+	SET B,A
+	SET A,1
+	HWI [xPrint_Display_Addres]
+	SET PC,POP
+
+; --FUNCTION-----------------------------------
+; xPrint_Palette
+; --ARGS--------------------------------------
+; A - Addres
+; --RETURN------------------------------------
+; NONE
+; --------------------------------------------
+:xPrint_Palette
+	IFE [xSys_Inited_xPrint],1
+		SET PC,POP
+	SET B,A
+	SET A,2
+	HWI [xPrint_Display_Addres]
+	SET PC,POP
+	
+; --FUNCTION-----------------------------------
+; xPrint_Border
+; --ARGS--------------------------------------
+; A - Color
+; --RETURN------------------------------------
+; NONE
+; --------------------------------------------
+:xPrint_Border
+	IFE [xSys_Inited_xPrint],1
+		SET PC,POP
+	SET B,A
+	SET A,3
+	HWI [xPrint_Display_Addres]
+	SET PC,POP
+	
+; --FUNCTION-----------------------------------
+; xPrint_Scroll
+; --ARGS--------------------------------------
+; NONE
+; --RETURN------------------------------------
+; NONE
+; --------------------------------------------
+:xPrint_Scroll
+	IFE [xSys_Inited_xPrint],1
+		SET PC,POP
+	
+	SET I,[xPrint_Video_Memory_Start]
+	SET J,[xPrint_Video_Memory_Start]
+	ADD J,384
+	
+	SET [xPrint_TMP7],A
+	SET [xPrint_TMP8],B
+	SET [xPrint_TMP9],C
+	
+	SET C,[xPrint_Video_Memory_Color_B]
+	SET B,[xPrint_Video_Memory_Color_F]
+	SET A,0x0020
+	SHL B,12
+	SHL C,8
+	ADD B,C
+	BOR A,B
+	
+	IFE [xKeyboard_ReadLine],1
+		SUB [xKeyboard_TMP2],32
+	SUB [xPrint_Video_Memory_Offset],32
+:xPrint_Scroll_Loop1_Start
+	SET [I],[I+32]
+	ADD I,1
+	IFL I,J
+		SET PC,xPrint_Scroll_Loop1_Start
+
+	SET I,[xPrint_Video_Memory_Start]
+	ADD I,352
+	SET J,[xPrint_Video_Memory_Start]
+	ADD J,384
+:xPrint_Scroll_Loop2_Start	
+	SET [I],A
+	ADD I,1
+	IFL I,J
+		SET PC,xPrint_Scroll_Loop2_Start
+		
+	SET A,[xPrint_TMP7]
+	SET B,[xPrint_TMP8]
+	SET C,[xPrint_TMP9]
+		
+	SET PC,POP
+
+; --------------------------------------------
+; MEMORY SYMBOLS
+; --------------------------------------------
+
+:xPrint_Video_Memory_Start DAT 0xE000
+:xPrint_Video_Memory_Start_Cur DAT 0xE000
+:xPrint_Video_Memory_Offset DAT 0x0001
+
+:xPrint_Video_Memory_Color_B DAT 0x0
+:xPrint_Video_Memory_Color_F DAT 0xF
+
+; --------------------------------------------
+; TEMP
+; --------------------------------------------
+
+:xPrint_TMP0 DAT 0x0000
+:xPrint_TMP1 DAT 0x0000
+:xPrint_TMP2 DAT 0x0000
+:xPrint_TMP3 DAT 0x0000
+:xPrint_TMP4 DAT 0x0000
+:xPrint_TMP5 DAT 0x0000
+:xPrint_TMP6 DAT 0x0000
+:xPrint_TMP7 DAT 0x0000
+:xPrint_TMP8 DAT 0x0000
+:xPrint_TMP9 DAT 0x0000

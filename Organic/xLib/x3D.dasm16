@@ -1,0 +1,70 @@
+; --------------------------------------------
+; x3D
+; 0x10c SPED-3 Driver
+; Made by lukezaa
+; --------------------------------------------
+
+; --FUNCTION-----------------------------------
+; x3D_Poll_Drive
+; --ARGS--------------------------------------
+; NONE
+; --RETURN------------------------------------
+; B - Cur. State
+; C - Last Error
+; --------------------------------------------
+:x3D_Poll_Drive
+	IFE [xSys_Inited_x3D],1
+		SET PC,POP
+	SET A,0
+	HWI [x3D_Display_Addres]
+	SET PC,POP
+	
+; --FUNCTION-----------------------------------
+; x3D_Map
+; --ARGS--------------------------------------
+; X - Mem. Pos
+; Y - Total number of vertices
+; --RETURN------------------------------------
+; NONE
+; --------------------------------------------
+:x3D_Map
+	IFE [xSys_Inited_x3D],1
+		SET PC,POP
+	SET A,1
+	HWI [x3D_Display_Addres]
+	SET PC,POP
+	
+; --FUNCTION-----------------------------------
+; x3D_Rotate
+; --ARGS--------------------------------------
+; X - Angle
+; --RETURN------------------------------------
+; NONE
+; --------------------------------------------
+:x3D_Rotate
+	IFE [xSys_Inited_x3D],1
+		SET PC,POP
+	SET A,1
+	HWI [x3D_Display_Addres]
+	SET PC,POP	
+	
+; --------------------------------------------
+; MEMORY SYMBOLS
+; --------------------------------------------
+
+
+
+; --------------------------------------------
+; TEMP
+; --------------------------------------------
+
+:x3D_TMP0 DAT 0x0000
+:x3D_TMP1 DAT 0x0000
+:x3D_TMP2 DAT 0x0000
+:x3D_TMP3 DAT 0x0000
+:x3D_TMP4 DAT 0x0000
+:x3D_TMP5 DAT 0x0000
+:x3D_TMP6 DAT 0x0000
+:x3D_TMP7 DAT 0x0000
+:x3D_TMP8 DAT 0x0000
+:x3D_TMP9 DAT 0x0000

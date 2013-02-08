@@ -1,0 +1,241 @@
+; --------------------------------------------
+; stdlib
+; 0x10c stdlib colection
+; = / =
+; --------------------------------------------
+
+; --FUNCTION-----------------------------------
+; stdlib_itoa
+; --ARGS--------------------------------------
+; A - Numer
+; B - String pointer (max 5 char long)
+; --RETURN------------------------------------
+; B - String
+; --------------------------------------------
+
+:stdlib_itoa
+	SET J,0
+	SET I,B
+	IFE A,0
+		SET PC,stdlib_itoa_Zero_String
+	
+:stdlib_itoa_Loop1
+	IFE A,0
+		SET PC,stdlib_itoa_Loop2
+	SET X,A
+	MOD X,0xA
+	DIV A,0xA
+	SET PUSH,X
+	ADD J,1
+	SET PC,stdlib_itoa_Loop1
+:stdlib_itoa_Loop2
+	IFE J,0 
+		SET PC,stdlib_itoa_End
+	SET X,POP
+	SET Y,stdlib_itoa_data
+	ADD Y,X
+	SET [I],[Y]
+	ADD I,1
+	SUB J,1
+	SET PC,stdlib_itoa_Loop2
+:stdlib_itoa_End
+	SET [I],0x0003
+	SET PC,POP
+:stdlib_itoa_Zero_String
+	SET [I],0x30
+	ADD I,1
+	SET [I],0x0003
+	SET PC,POP
+	
+; --FUNCTION-----------------------------------
+; stdlib_itoa_hex
+; --ARGS--------------------------------------
+; A - Numer
+; B - String pointer (max 5 char long)
+; --RETURN------------------------------------
+; B - String
+; --------------------------------------------
+:stdlib_itoa_hex
+	SET J,0
+	SET I,B
+	IFE A,0
+		SET PC,stdlib_itoa_hex_Zero_String
+:stdlib_itoa_hex_Loop1
+	IFE A,0
+		SET PC,stdlib_itoa_hex_Loop2
+	SET X,A
+	MOD X,0x10
+	DIV A,0x10
+	SET PUSH,X
+	ADD J,1
+	SET PC,stdlib_itoa_hex_Loop1
+:stdlib_itoa_hex_Loop2
+	IFL J,4
+		SET PC,stdlib_itoa_hex_Loop3
+:stdlib_itoa_hex_Loop2_Start
+	IFE J,0 
+		SET PC,stdlib_itoa_hex_End
+	SET X,POP
+	SET Y,stdlib_itoa_hex_data
+	ADD Y,X
+	SET [I],[Y]
+	ADD I,1
+	SUB J,1
+	SET PC,stdlib_itoa_hex_Loop2_Start
+:stdlib_itoa_hex_Loop3
+	SET Y,4
+	SUB Y,J
+:stdlib_itoa_hex_Loop3_Start
+	IFE Y,0
+		SET PC,stdlib_itoa_hex_Loop2_Start
+	SET [I],'0'
+	ADD I,1
+	SUB Y,1
+	SET PC,stdlib_itoa_hex_Loop3_Start
+:stdlib_itoa_hex_End
+	SET [I],0x0003
+	SET PC,POP
+:stdlib_itoa_hex_Zero_String
+	SET [I],0x30
+	ADD I,1
+	SET [I],0x30
+	ADD I,1
+	SET [I],0x30
+	ADD I,1
+	SET [I],0x30
+	ADD I,1
+	SET [I],0x0003
+	SET PC,POP
+	
+; --FUNCTION-----------------------------------
+; stdlib_strcmp
+; --ARGS--------------------------------------
+; A - String pointer #1
+; B - String pointer #2
+; --RETURN------------------------------------
+; A - Result
+; B - Strlen
+; --------------------------------------------
+:stdlib_strcmp
+	SET I,0
+:stdlib_strcmp_Loop1
+	IFE [A],0x0003
+		IFE [B],0x0003
+			SET PC,stdlib_strcmp_end
+	IFN [A],[B]
+		SET PC,stdlib_strcmp_fail
+	ADD A,1
+	ADD B,1
+	SET PC,stdlib_strcmp_Loop1
+:stdlib_strcmp_end
+	SET A,0
+	SET PC,POP
+:stdlib_strcmp_fail
+	SET A,1
+	SET B,0
+	SET PC,POP
+	
+; --FUNCTION-----------------------------------
+; stdlib_strlen
+; --ARGS--------------------------------------
+; A - String pointer
+; --RETURN------------------------------------
+; I - String Length
+; --------------------------------------------
+
+:stdlib_strlen
+	SET I,0
+:stdlib_strlen_Loop
+	IFE [A],0x0003
+		SET PC,POP
+	ADD A,1
+	ADD I,1
+	SET PC,stdlib_strlen_Loop
+	
+; --FUNCTION-----------------------------------
+; stdlib_atoi
+; --ARGS--------------------------------------
+; B - String pointer (max 5 char long)
+; --RETURN------------------------------------
+; A - Number
+; --------------------------------------------
+:stdlib_atoi
+	SET A,0
+:stdlib_atoi_Loop1
+	IFE [B],0x0003
+		SET PC,stdlib_atoi_end
+	SET C,[B]
+	SUB C,0x30
+	ADD A,C
+	MUL A,0xF
+	ADD B,1
+	SET PC,stdlib_atoi_Loop1
+:stdlib_atoi_end
+	SET PC,POP
+	
+; --FUNCTION-----------------------------------
+; stdlib_rand
+; --ARGS--------------------------------------
+; A - Min. Numer
+; B - Max. Number
+; --RETURN------------------------------------
+; A - Pseudo random numer
+; --------------------------------------------
+:stdlib_rand
+	SET X,[stdlib_rand_seed]
+	MUL X,0xE3D1
+	ADD X,0x2B69
+	SHR X,3
+	SET I,B
+	SUB I,A
+	MOD X,I
+	ADD X,A
+	SET [stdlib_rand_seed],X
+	SET A,X
+	SET PC,POP
+	
+; --FUNCTION-----------------------------------
+; stdlib_get_1b
+; --ARGS--------------------------------------
+; A - Mem. pointer
+; --RETURN------------------------------------
+; A - Byte
+; --------------------------------------------
+:stdlib_get_1b
+	SET B,[A]
+	AND B,0xFF00
+	SHR B,8
+	SET A,B
+	SET PC,POP
+	
+; --FUNCTION-----------------------------------
+; stdlib_get_2b
+; --ARGS--------------------------------------
+; A - Mem. pointer
+; --RETURN------------------------------------
+; A - Byte
+; --------------------------------------------
+:stdlib_get_2b
+	SET B,[A]
+	AND B,0x00FF
+	SET A,B
+	SET PC,POP
+	
+; --FUNCTION-----------------------------------
+; stdlib_cstr_to_dstr
+; --ARGS--------------------------------------
+; A - Mem. pointer
+; B - New str. pointer
+; --RETURN------------------------------------
+; None
+; --------------------------------------------
+:stdlib_cstr_to_dstr
+	SET I,A
+:stdlib_cstr_to_dstr_Loop1
+	SET A,I
+	JSR
+	SET PC,POP
+	
+:stdlib_rand_seed DAT 0x5FD0
+:stdlib_itoa_data DAT "0123456789"
+:stdlib_itoa_hex_data DAT "0123456789ABCDEF"

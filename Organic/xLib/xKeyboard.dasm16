@@ -1,0 +1,159 @@
+; --------------------------------------------
+; xKeyboard
+; 0x10c Keyboard Driver
+; Made by lukezaa
+; --------------------------------------------
+	
+; --FUNCTION-----------------------------------
+; xKeyboard_Read_Char
+; --ARGS--------------------------------------
+; NONE
+; --RETURN------------------------------------
+; A - Char
+; --------------------------------------------
+:xKeyboard_Read_Char
+	IFE [xSys_Inited_xKeyboard],1
+		SET PC,POP
+	SET [xKeyboard_ReadLine],1
+:xKeyboard_Read_Char_Loop1_Start
+	SET A,1
+	HWI [xKeyboard_Keyboard_Addres]
+	IFE C,0
+		SET PC,xKeyboard_Read_Char_Loop1_Start
+	SET A,C
+	SET [xKeyboard_ReadLine],0
+	SET PC,POP
+	
+; --FUNCTION-----------------------------------
+; xKeyboard_Is_Press
+; --ARGS--------------------------------------
+; A - Char
+; --RETURN------------------------------------
+; A - Flag (1 - Yes 0 - No)
+; --------------------------------------------
+:xKeyboard_Is_Press
+	IFE [xSys_Inited_xKeyboard],1
+		SET PC,POP
+	SET B,A
+	SET A,2
+	HWI [xKeyboard_Keyboard_Addres]
+	SET A,C
+	SET PC,POP
+	
+; --FUNCTION-----------------------------------
+; xKeyboard_Switch_INT
+; --ARGS--------------------------------------
+; X - State
+; --RETURN------------------------------------
+; NONE
+; --------------------------------------------
+:xKeyboard_Switch_INT
+	IFE [xSys_Inited_xKeyboard],1
+		SET PC,POP
+	SET A,3
+	HWI [xKeyboard_Keyboard_Addres]
+	SET PC,POP
+	
+; --FUNCTION-----------------------------------
+; xKeyboard_INT
+; --ARGS--------------------------------------
+; NONE
+; --RETURN------------------------------------
+; NONE
+; --------------------------------------------
+:xKeyboard_INT
+	IFE [xSys_Inited_xKeyboard],1
+		SET PC,POP
+	IFE [xKeyboard_ReadLine],1
+		SET PC,POP
+	SET A,1
+	HWI [xKeyboard_Keyboard_Addres]
+	SET [xKeyboard_Last_Key],C
+	SET PC,POP
+	
+; --FUNCTION-----------------------------------
+; xKeyboard_Read_Line
+; --ARGS--------------------------------------
+; A - String pointer
+; B - Font Color
+; C - Char BG Font
+; --RETURN------------------------------------
+; NONE
+; --------------------------------------------
+:xKeyboard_Read_Line
+	IFE [xSys_Inited_xKeyboard],1
+		SET PC,POP
+	SET [xKeyboard_ReadLine],1
+	SET X,A
+	SUB [xPrint_Video_Memory_Offset],1
+	SET [xKeyboard_TMP0],[xPrint_Video_Memory_Color_F]
+	SET [xKeyboard_TMP1],[xPrint_Video_Memory_Color_B]
+	SET [xKeyboard_TMP2],[xPrint_Video_Memory_Offset]
+:xKeyboard_Read_Line_Loop1_Start
+	SET B,[xKeyboard_TMP0]
+	SET C,[xKeyboard_TMP1]
+	JSR	xPrint_Print_Cursor
+	SET A,1
+	HWI [xKeyboard_Keyboard_Addres]
+	IFE C,0
+		SET PC,xKeyboard_Read_Line_Loop1_Start
+	IFE C,0x10
+		SET PC,xKeyboard_Read_Line_Backspace
+	IFE C,0x11
+		SET PC,xKeyboard_Read_Line_Enter
+	SET [X],C
+	ADD X,1
+	SET A,C
+	SET B,[xKeyboard_TMP0]
+	SET C,[xKeyboard_TMP1]
+	JSR	xPrint_Print_Char
+	SET PC,xKeyboard_Read_Line_Loop1_Start
+	SET PC,POP
+:xKeyboard_Read_Line_Enter
+	SET A,[xPrint_Video_Memory_Offset]
+	ADD A,1
+	SET B,[xKeyboard_TMP0]
+	SET C,[xKeyboard_TMP1]
+	JSR xPrint_Del_Char
+	ADD [xPrint_Video_Memory_Offset],1
+	SET [X],0x0003
+	SET [xKeyboard_ReadLine],0
+	JSR xPrint_New_Line
+	SET PC,POP
+:xKeyboard_Read_Line_Backspace
+	IFE [xPrint_Video_Memory_Offset],[xKeyboard_TMP2]
+		SET PC,xKeyboard_Read_Line_Loop1_Start
+	SET A,[xPrint_Video_Memory_Offset]
+	ADD A,1
+	SET B,[xKeyboard_TMP0]
+	SET C,[xKeyboard_TMP1]
+	JSR xPrint_Del_Char
+	SUB X,1
+	SET A,[xPrint_Video_Memory_Offset]
+	SET B,[xKeyboard_TMP0]
+	SET C,[xKeyboard_TMP1]
+	JSR xPrint_Del_Char
+	SUB [xPrint_Video_Memory_Offset],1
+	SET PC,xKeyboard_Read_Line_Loop1_Start
+	
+; --------------------------------------------
+; MEMORY SYMBOLS
+; --------------------------------------------
+
+:xKeyboard_Last_Key DAT 0x0000
+:xKeyboard_ReadLine DAT 0x0000
+
+; --------------------------------------------
+; TEMP
+; --------------------------------------------
+
+:xKeyboard_TMP0 DAT 0x0000
+:xKeyboard_TMP1 DAT 0x0000
+:xKeyboard_TMP2 DAT 0x0000
+:xKeyboard_TMP3 DAT 0x0000
+:xKeyboard_TMP4 DAT 0x0000
+:xKeyboard_TMP5 DAT 0x0000
+:xKeyboard_TMP6 DAT 0x0000
+:xKeyboard_TMP7 DAT 0x0000
+:xKeyboard_TMP8 DAT 0x0000
+:xKeyboard_TMP9 DAT 0x0000

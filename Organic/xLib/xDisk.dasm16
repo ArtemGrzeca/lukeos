@@ -1,0 +1,105 @@
+; --------------------------------------------
+; xDisk
+; 0x10c M35FD 3.5 inch Floppy Disk Drive Driver
+; Made by lukezaa
+; --------------------------------------------
+
+; --FUNCTION-----------------------------------
+; xDisk_Poll_Drive
+; --ARGS--------------------------------------
+; NONE
+; --RETURN------------------------------------
+; B - Cur. State
+; C - Last Error
+; --------------------------------------------
+:xDisk_Poll_Drive
+	IFE [xSys_Inited_xDisk],1
+		SET PC,POP
+	SET A,0
+	HWI [xDisk_Drive_Addres]
+	SET [xDisk_State],B
+	SET [xDisk_LError],C
+	SET PC,POP
+	
+; --FUNCTION-----------------------------------
+; xDisk_Switch_INT
+; --ARGS--------------------------------------
+; X - State
+; --RETURN------------------------------------
+; NONE
+; --------------------------------------------
+:xDisk_Switch_INT
+	IFE [xSys_Inited_xDisk],1
+		SET PC,POP
+	SET A,1
+	HWI [xDisk_Drive_Addres]
+	SET PC,POP
+	
+; --FUNCTION-----------------------------------
+; xDisk_Write
+; --ARGS--------------------------------------
+; X - Sector
+; Y - Mem. Pointer
+; --RETURN------------------------------------
+; B - Write info
+; --------------------------------------------
+:xDisk_Write
+	IFE [xSys_Inited_xDisk],1
+		SET PC,POP
+	IFN [xDisk_State],0x0001
+		SET PC,POP
+	SET A,3
+	HWI [xDisk_Drive_Addres]
+	SET PC,POP
+	
+; --FUNCTION-----------------------------------
+; xDisk_Read
+; --ARGS--------------------------------------
+; X - Sector
+; Y - Mem. Pointer
+; --RETURN------------------------------------
+; B - Write info
+; --------------------------------------------
+:xDisk_Read
+	IFE [xSys_Inited_xDisk],1
+		SET PC,POP
+	IFN [xDisk_State],0x0001
+		SET PC,POP
+	SET A,2
+	HWI [xDisk_Drive_Addres]
+	SET PC,POP
+	
+; --FUNCTION-----------------------------------
+; xDisk_INT
+; --ARGS--------------------------------------
+; NONE
+; --RETURN------------------------------------
+; NONE
+; --------------------------------------------
+:xDisk_INT
+	IFE [xSys_Inited_xDisk],1
+		SET PC,POP
+	JSR xDisk_Poll_Drive
+	SET PC,POP
+	
+; --------------------------------------------
+; MEMORY SYMBOLS
+; --------------------------------------------
+
+:xDisk_LError DAT 0x0000
+:xDisk_State DAT 0x0000
+
+; --------------------------------------------
+; TEMP
+; --------------------------------------------
+
+:xDisk_TMP0 DAT 0x0000
+:xDisk_TMP1 DAT 0x0000
+:xDisk_TMP2 DAT 0x0000
+:xDisk_TMP3 DAT 0x0000
+:xDisk_TMP4 DAT 0x0000
+:xDisk_TMP5 DAT 0x0000
+:xDisk_TMP6 DAT 0x0000
+:xDisk_TMP7 DAT 0x0000
+:xDisk_TMP8 DAT 0x0000
+:xDisk_TMP9 DAT 0x0000

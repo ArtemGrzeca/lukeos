@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<project version="1.7.6" type="code">
+  <name>Organic</name>
+  <properties>
+    <property name="code.generateBinaryOutput">true</property>
+    <property name="code.binaryOutputFilename">Organic.bin</property>
+    <property name="code.generateHexOutput">True</property>
+    <property name="code.hexOutputFilename">Organic.hex</property>
+    <property name="code.setFirstFile">True</property>
+    <property name="code.firstFile">main.dasm16</property>
+    <property name="code.generateSelfRelocatingCode">False</property>
+  </properties>
+  <references />
+  <files>
+    <file path="stdlib.dasm16" />
+    <file path="main.dasm16" />
+    <file path="xLib\x3D.dasm16" />
+    <file path="xLib\xDisk.dasm16" />
+    <file path="xLib\xKeyboard.dasm16" />
+    <file path="xLib\xPrint.dasm16" />
+    <file path="xLib\xSys.dasm16" />
+    <file path="shell.dasm16" />
+    <file path="xLib\xSFS.dasm16" />
+    <file path="xLib\xClock.dasm16" />
+    <file path="xApi.dasm16" />
+  </files>
+</project>

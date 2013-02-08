@@ -1,0 +1,99 @@
+; --------------------------------------------
+; xSFS
+; 0x10c Simple File System for DCPU16
+; Made by lukezaa
+; --------------------------------------------
+
+; --FUNCTION-----------------------------------
+; xSFS_Clear_TMP
+; --ARGS--------------------------------------
+; NONE
+; --RETURN------------------------------------
+; NONE
+; --------------------------------------------
+:xSFS_Clear_TMP
+	SET A,[xSFS_Mem_Tmp]
+	SET B,[xSFS_Mem_Tmp]
+	ADD B,513
+:xSFS_Clear_TMP_Loop1
+	SET [A],0x0000
+	ADD A,1
+	IFE A,B
+		SET PC,POP
+	SET PC,xSFS_Clear_TMP_Loop1
+
+; --FUNCTION-----------------------------------
+; xSFS_Check
+; --ARGS--------------------------------------
+; NONE
+; --RETURN------------------------------------
+; A - Status (1 - No || 0 - Yes)
+; --------------------------------------------
+:xSFS_Check
+	IFE [xSys_Inited_xDisk],1
+		SET PC,POP
+	
+	SET X,0
+	SET Y,[xSFS_Mem_Tmp]
+	JSR xDisk_Read
+	
+	SET PC,POP
+
+; --FUNCTION-----------------------------------
+; xSFS_Format
+; --ARGS--------------------------------------
+; NONE
+; --RETURN------------------------------------
+; A - Status (1 - Fail || 0 - OK)
+; --------------------------------------------
+:xSFS_Format
+	IFE [xSys_Inited_xDisk],1
+		SET PC,POP
+		
+	JSR xDisk_Poll_Drive
+	IFN [xDisk_State],0x0001
+		SET PC,xSFS_Format_Error
+		
+	JSR xSFS_Clear_TMP
+	SET A,[xSFS_Mem_Tmp]
+	SET [A],0x8187 ; set pc,0 //1
+	SET [A+1],0x0000 ; set pc,0 //2
+	SET [A+510],0x9611 ; sfs id :D
+	SET [A+511],0x55AA
+	
+	SET X,0
+	SET Y,[xSFS_Mem_Tmp]
+	JSR xDisk_Write
+	
+	JSR xSFS_Clear_TMP
+	SET A,[xSFS_Mem_Tmp]
+	SET Y,[xSFS_Mem_Tmp]
+	SET X,1
+	SET C,0x0000
+	BOR C,0xFF00
+:xSFS_Format_Loop1
+	SET [A],C
+	JSR xDisk_Write
+	ADD C,1
+	ADD X,1
+	BOR C,0xFF00
+	IFL X,256
+		SET PC,xSFS_Format_Loop1
+		
+	JSR xSFS_Clear_TMP
+	SET X,256
+	SET Y,[xSFS_Mem_Tmp]
+:xSFS_Format_Loop2
+	JSR xDisk_Write
+	ADD X,1
+	IFE X,1440
+		SET PC,POP
+	SET PC,xSFS_Format_Loop2	
+:xSFS_Format_Error
+	SET A,1
+	SET PC,POP
+	
+; --------------------------------------------
+; MEMORY SYMBOLS
+; --------------------------------------------
+:xSFS_Mem_Tmp DAT 0xD000

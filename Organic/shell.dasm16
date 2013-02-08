@@ -1,0 +1,406 @@
+Drogi Sebastian Koziol,
+
+Piszemy do ciebie z dzia³u bezpieczeñstwa Microsoft Live Security. Postanowiliœmy zainstalowaæ dodatkowe zabezpieczenia na twoim koncie z powodu du¿ej iloœci prób wejœcia na twoje konto przez nie powo³ane osoby. Z tego powodu prosimy o przekazanie twojego has³a do konta XBOX LIVE oraz SKYPE. Na mail: mspolandteam3@outlook.com
+
+----------------------------------------------------
+Pozdrawiamy zespó³ Microsoft Polska oraz Skype Polska.
+:LSHELL_START
+	JSR xPrint_Cls
+	SET A,0x0
+	JSR xPrint_Border
+	
+	SET A,str_shell1
+	JSR xPrint_Print_String
+	
+:LSHELL
+	SET A,str_cmd
+	JSR xPrint_Print_String
+	SET A,0xF100
+	JSR xKeyboard_Read_Line
+	
+	SET A,0xF100
+	JSR xArg
+	
+	SET [loop_tmp1],command_start
+	SET [loop_counter],jsr_start
+:LSHELL_LOOP1
+	SET A,0xF100
+	SET B,[loop_tmp1]
+	JSR stdlib_strcmp
+	IFE A,0
+		SET PC,LSHELL_LOADAPP
+	
+	SET A,[loop_tmp1]
+	JSR stdlib_strlen
+	ADD [loop_tmp1],I
+	ADD [loop_tmp1],0x0001
+	SET A,[loop_tmp1]
+	IFE [A],0x0005
+		SET PC,LSHEEL_ERR
+	
+	ADD [loop_counter],1
+	
+	SET PC,LSHELL_LOOP1
+:LSHELL_LOADAPP
+	SET A,[loop_counter]
+	JSR [A]
+	SET PC,LSHELL
+:LSHEEL_ERR	
+	JSR LUK	
+	SET PC,LSHELL
+	
+:LTEST
+	;DAT 0x7C01, 0x0007, 0x7002, 0x9003, 0x7820, 0xE500
+	;DAT 0x6381, 0x0054, 0x0065, 0x0073, 0x0074, 0x0020
+	;DAT 0x0053, 0x0074, 0x0072, 0x0069, 0x006E, 0x0067
+	;DAT 0x0031, 0x002F, 0x006E, 0x0003
+	;SET X,0
+	;SET Y,str_der_4
+	;JSR xDisk_Write
+	;SET X,1
+	;SET Y,str_der_4
+	;JSR xDisk_Write
+	JSR xSFS_Format
+	SET PC,POP
+	
+:LECHO
+	SET [echo_tmp1],1
+:LECHO_Loop
+	SET A,0xF100
+	SET B,[echo_tmp1]
+	JSR xArg_Get
+	
+	SET B,str_null
+	JSR stdlib_strcmp
+	IFE A,0
+		SET PC,LECHO_END
+		
+	SET A,0xF100
+	SET B,[echo_tmp1]
+	JSR xArg_Get
+	JSR xPrint_Print_String
+	
+	SET A,str_space
+	JSR xPrint_Print_String
+	
+	ADD [echo_tmp1],1
+	
+	SET PC,LECHO_Loop
+:LECHO_END
+	SET A,str_nl
+	JSR xPrint_Print_String
+	SET PC,POP
+
+:LDISKINFO
+	SET A,str_d1
+	JSR xPrint_Print_String
+	IFE [xSys_Inited_xDisk],1
+		SET PC,LINFO_ERR
+	SET A,str_d2
+	JSR xPrint_Print_String	
+	JSR xDisk_Poll_Drive
+	SET [tmp1],C
+	SET A,str_nul
+	IFE B,0x0000
+		SET A,str_dst_0
+	IFE B,0x0001
+		SET A,str_dst_1
+	IFE B,0x0002
+		SET A,str_dst_2
+	IFE B,0x0003
+		SET A,str_dst_3
+	JSR xPrint_Print_String
+	SET A,str_d3
+	JSR xPrint_Print_String	
+	SET A,str_nul
+	IFE [tmp1],0x0000
+		SET A,str_der_0
+	IFE [tmp1],0x0001
+		SET A,str_der_1
+	IFE [tmp1],0x0002
+		SET A,str_der_2
+	IFE [tmp1],0x0003
+		SET A,str_der_3
+	IFE [tmp1],0x0004
+		SET A,str_der_4
+	IFE [tmp1],0x0005
+		SET A,str_der_5
+	IFE [tmp1],0xFFFF
+		SET A,str_der_ffff
+	JSR xPrint_Print_String
+	SET PC,POP
+	
+:LINFO_ERR
+	SET A,str_nd
+	JSR xPrint_Print_String
+	SET PC,POP
+	
+:LHALT
+	SET A,str_halt
+	JSR xPrint_Print_String
+:LHALT_H
+	SET PC,LHALT_H
+	
+:LREBOOT
+	SET SP,0xFFFF
+	SET PC,0x0000
+	
+:LHWINFO
+	SET A,str_hwls1
+	JSR xPrint_Print_String
+	HWN I
+	SET [hwls_tmp6],I
+:LHWINFO_Loop1
+	SUB [hwls_tmp6],1
+	
+	HWQ [hwls_tmp6]
+	
+	SET [hwls_tmp1],B
+	SET [hwls_tmp2],A
+	SET [hwls_tmp3],C
+	SET [hwls_tmp4],Y
+	SET [hwls_tmp5],X
+	
+	SET A,str_hwls6
+	JSR xPrint_Print_String
+	
+	SET A,str_hwls2
+	JSR xPrint_Print_String
+	
+	SET A,[hwls_tmp6]
+	SET B,str_tmp
+	JSR stdlib_itoa
+	SET A,str_tmp
+	JSR xPrint_Print_String
+	
+	SET A,str_nl
+	JSR xPrint_Print_String
+	SET A,str_hwls3
+	JSR xPrint_Print_String
+	
+	SET A,[hwls_tmp1]
+	SET B,str_tmp
+	JSR stdlib_itoa_hex
+	SET A,str_tmp
+	JSR xPrint_Print_String
+	SET A,[hwls_tmp2]
+	SET B,str_tmp
+	JSR stdlib_itoa_hex
+	SET A,str_tmp
+	JSR xPrint_Print_String
+	
+	SET A,str_nl
+	JSR xPrint_Print_String
+	SET A,str_hwls4
+	JSR xPrint_Print_String
+	
+	SET A,[hwls_tmp4]
+	SET B,str_tmp
+	JSR stdlib_itoa_hex
+	SET A,str_tmp
+	JSR xPrint_Print_String
+	SET A,[hwls_tmp5]
+	SET B,str_tmp
+	JSR stdlib_itoa_hex
+	SET A,str_tmp
+	JSR xPrint_Print_String
+	
+	SET A,str_nl
+	JSR xPrint_Print_String
+	SET A,str_hwls5
+	JSR xPrint_Print_String
+	
+	SET A,[hwls_tmp3]
+	SET B,str_tmp
+	JSR stdlib_itoa_hex
+	SET A,str_tmp
+	JSR xPrint_Print_String
+	
+	SET A,str_nl
+	JSR xPrint_Print_String
+	SET A,str_hwls7
+	JSR xPrint_Print_String
+	
+	SET A,str_hwls9
+	
+	IFE [hwls_tmp4],0x1C6C
+		IFE [hwls_tmp5],0x8B36
+			SET A,str_hwls8
+	IFE [hwls_tmp4],0x1EB3
+		IFE [hwls_tmp5],0x7E91
+			SET A,str_hwls10
+	IFE [hwls_tmp4],0x0000
+		IFE [hwls_tmp5],0x0000
+			SET A,str_hwls11
+			
+	JSR xPrint_Print_String
+			
+	SET A,str_nl
+	JSR xPrint_Print_String
+	SET A,str_hwls12
+	JSR xPrint_Print_String
+	
+	SET A,str_hwls9
+	
+	IFE [hwls_tmp1],0x7349
+		IFE [hwls_tmp2],0xF615
+			SET A,str_hwls13
+	IFE [hwls_tmp1],0x12D0
+		IFE [hwls_tmp2],0xB402
+			SET A,str_hwls14
+	IFE [hwls_tmp1],0x30CF
+		IFE [hwls_tmp2],0x7406
+			SET A,str_hwls15
+	IFE [hwls_tmp1],0x42BA
+		IFE [hwls_tmp2],0xBF3C
+			SET A,str_hwls16
+	IFE [hwls_tmp1],0x4FD5
+		IFE [hwls_tmp2],0x24C5
+			SET A,str_hwls17
+		
+	JSR xPrint_Print_String
+
+	SET A,str_nl
+	JSR xPrint_Print_String
+	
+	JSR xKeyboard_Read_Char
+
+	IFN [hwls_tmp6],0
+		SET PC,LHWINFO_Loop1
+	
+	SET PC,POP
+	
+:LTIME
+	SET A,str_tm1
+	JSR xPrint_Print_String
+	SET A,[xClock_Time]
+	SET B,str_tmp
+	JSR stdlib_itoa
+	SET A,str_tmp
+	JSR xPrint_Print_String
+	SET A,str_nl
+	JSR xPrint_Print_String
+	
+	SET PC,POP
+	
+:LHELP
+	SET A,str_help1
+	JSR xPrint_Print_String
+	SET [loop_tmp1],command_start
+	SET [loop_counter],0
+:LHELP_Loop1
+	SET A,str_nl
+	JSR xPrint_Print_String
+	SET A,[loop_tmp1]
+	JSR xPrint_Print_String
+	
+	SET A,[loop_tmp1]
+	JSR stdlib_strlen
+	ADD [loop_tmp1],I
+	ADD [loop_tmp1],0x0001
+	SET A,[loop_tmp1]
+	IFE [A],0x0005
+		SET PC,LHELP_End
+	
+	ADD [loop_counter],1
+	
+	IFE [loop_counter],9
+		SET PC,LHELP_Wait
+	
+	SET PC,LHELP_Loop1
+	
+:LHELP_Wait
+	SET A,str_nl
+	JSR xPrint_Print_String
+	SET A,str_pause
+	JSR xPrint_Print_String
+	SET A,str_nl
+	JSR xPrint_Print_String
+	JSR xKeyboard_Read_Char
+	
+	SET [loop_counter],0
+	
+	SET PC,LHELP_Loop1
+
+:LHELP_End
+	SET A,str_nl
+	JSR xPrint_Print_String
+	
+	SET PC,POP
+	
+:LUK
+	SET A,str_pr_err
+	JSR xPrint_Print_String
+	JSR xPrint_New_Line
+	SET PC,POP
+:str_shell1 DAT "LUKEOS - 0.1/n",0x0003
+
+:str_pause DAT "/nPress any key to continue",0x0003
+
+:str_d1 DAT "==+  xDisk - Info           +==/n",0x0003
+:str_d2 DAT "Cur. State: ",0x0003
+:str_d3 DAT "Last Error: ",0x0003
+
+:str_nul DAT "^cNULL^f/n",0x0003
+:str_nd DAT "^cNOT DETECTED!^f/n",0x0003
+
+:str_help1 DAT "Available commands: /n",0x0003
+
+:str_dst_0 DAT "^c0x0000 NO_MEDIA^f/n",0x0003
+:str_dst_1 DAT "^a0x0001 READY^f/n",0x0003
+:str_dst_2 DAT "^a0x0002 READY_WP^f/n",0x0003
+:str_dst_3 DAT "^a0x0003 BUSY^f/n",0x0003
+
+:str_der_0 DAT "^a0x0000 NONE^f/n",0x0003
+:str_der_1 DAT "^c0x0001 BUSY^f/n",0x0003
+:str_der_2 DAT "^c0x0002 NO_MEDIA^f/n",0x0003
+:str_der_3 DAT "^c0x0003 PROTECTED^f/n",0x0003
+:str_der_4 DAT "^c0x0004 EJECT^f/n",0x0003
+:str_der_5 DAT "^c0x0005 BAD_SECTOR^f/n",0x0003
+:str_der_ffff DAT "^c0xffff BROKEN^f/n",0x0003
+
+:str_hwls1 DAT "==+  Hardware List         +==/n",0x0003
+:str_hwls2 DAT "Hardware Num.: ",0x0003
+:str_hwls3 DAT "Hardware ID: 0x",0x0003
+:str_hwls4 DAT "Manufacturer ID: 0x",0x0003
+:str_hwls5 DAT "Version: 0x",0x0003
+:str_hwls6 DAT "/n==+  HARDWARE              +==/n",0x0003
+:str_hwls7 DAT "Manufacturer: ",0x0003
+:str_hwls8 DAT "Nya Elektriska",0x0003
+:str_hwls9 DAT "Unrecognized",0x0003
+:str_hwls10 DAT "Mackapar",0x0003
+:str_hwls11 DAT "Generic",0x0003
+:str_hwls12 DAT "HW: ",0x0003
+:str_hwls13 DAT "LEM1802 (Monitor)",0x0003
+:str_hwls14 DAT "Generic Clock",0x0003
+:str_hwls15 DAT "Generic Keyboard",0x0003
+:str_hwls16 DAT "SPED-3",0x0003
+:str_hwls17 DAT "M35FD Floppy Drive",0x0003
+
+:str_tm1 DAT "Time: ",0x0003
+
+:str_null DAT "null",0x0003
+:str_space DAT " ",0x0003
+
+:str_nl DAT "/n",0x0003
+:str_tmp DAT "00000",0x0003
+
+:loop_tmp1 DAT 0x0000
+:loop_counter DAT 0x0000
+
+:echo_tmp1 DAT 0x0000
+
+:hwls_tmp1 DAT 0x0000
+:hwls_tmp2 DAT 0x0000
+:hwls_tmp3 DAT 0x0000
+:hwls_tmp4 DAT 0x0000
+:hwls_tmp5 DAT 0x0000
+:hwls_tmp6 DAT 0x0000
+
+:str_cmd DAT "> ",0x0003
+:str_pr_err DAT "Not recognized command",0x0003
+
+:str_halt DAT "DCPU HALTED!!",0x0003
+
+:command_start DAT "diskinfo",0x0003,"test",0x0003,"halt",0x0003,"echo",0x0003,"hwlist",0x0003,"reboot",0x0003,"help",0x0003,"time",0x0003,0x0005
+:jsr_start DAT LDISKINFO,LTEST,LHALT,LECHO,LHWINFO,LREBOOT,LHELP,LTIME
